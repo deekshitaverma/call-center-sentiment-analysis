@@ -1,0 +1,59 @@
+/* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* A subtle reset for box-sizing */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Ensure the layout takes up the full viewport and centers the content */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  overflow: hidden; /* This prevents the scrollbar from appearing */
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #e2e8f0;
+  display: flex; /* Use flexbox to center content */
+  justify-content: center;
+  align-items: center;
+}
+
+/* Positioning for the background canvas */
+#background-canvas {
+  position: fixed; /* This is the key change */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1; /* Ensures the canvas is behind the main content */
+}
+
+/* New CSS for the animated gradient border */
+@keyframes border-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-border-gradient {
+  background-image: linear-gradient(-45deg, #FF6B6B, #5377f7, #6EE2F5, #ff6e7f, #bfe9ff);
+  background-size: 400% 400%;
+  animation: border-gradient 15s ease infinite;
+}

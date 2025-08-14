@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sentiment Analysis</title>
+    <!-- Add the Inter font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <!-- Add the Tailwind CSS CDN for quick styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <!-- The canvas for the animated background -->
+    <canvas id="background-canvas"></canvas>
+    <!-- The root element for your React application -->
+    <div id="root"></div>
+    
+    <!-- This script is the entry point for your React app -->
+    <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- The script for the background animation -->
+    <script>
+      window.onload = function() {
+        const canvas = document.getElementById('background-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null, radius: 250 };
+
+        function init() {
+          resizeCanvas();
+          window.addEventListener('resize', resizeCanvas);
+          window.addEventListener('mousemove', (event) => {
+            mouse.x = event.x;
+            mouse.y = event.y;
+          });
+          window.addEventListener('mouseout', () => {
+            mouse.x = null;
+            mouse.y = null;
+          });
+          createParticles();
+          animate();
+        }
+
+        function resizeCanvas() {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+        }
+
+        function createParticles() {
+          particles = [];
+          const numberOfParticles = (canvas.width * canvas.height) / 9000;
+          for (let i = 0; i < numberOfParticles; i++) {
+            particles.push(new Particle());
+          }
+        }
+
+        class Particle {
+          constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2 + 1; // Slightly smaller, brighter particles
+            this.speedX = Math.random() * 1 - 0.5;
+            this.speedY = Math.random() * 1 - 0.5;
+            this.color = 'rgba(255, 255, 255, ' + (Math.random() * 0.8 + 0.2) + ')'; // Brighter white particles
+          }
+          update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+
+            if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
+            if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
+
+            // Mouse repulsion logic
+            if (mouse.x && mouse.y) {
+              const dx = mouse.x - this.x;
+              const dy = mouse.y - this.y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              if (distance < mouse.radius) {
+                const force = (mouse.radius - distance) / mouse.radius * 2;
+                const angle = Math.atan2(dy, dx);
+                this.x -= Math.cos(angle) * force;
+                this.y -= Math.sin(angle) * force;
+              }
+            }
+          }
+          draw() {
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        function animate() {
+          // Clear the canvas completely for a cleaner look
+          ctx.clearRect(0, 0, canvas.width, canvas.height); 
+
+          // Draw particles
+          for (let i = 0; i < particles.length; i++) {
+            particles[i].update();
+            particles[i].draw();
+            
+            // Connect particles
+            for (let j = i; j < particles.length; j++) {
+              const dx = particles[i].x - particles[j].x;
+              const dy = particles[i].y - particles[j].y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+
+              if (distance < 100) { // Connect nearby particles
+                ctx.beginPath();
+                ctx.strokeStyle = `rgba(100, 180, 250, ${1 - distance / 100})`; // Fading line
+                ctx.lineWidth = 1;
+                ctx.moveTo(particles[i].x, particles[i].y);
+                ctx.lineTo(particles[j].x, particles[j].y);
+                ctx.stroke();
+              }
+            }
+          }
+          requestAnimationFrame(animate);
+        }
+
+        init();
+      };
+    </script>
+  </body>
+</html>
